@@ -11,7 +11,7 @@ namespace DemoCICD.Controllers
         {
             return Ok(new
             {
-                Message = "Pipeline Trigger Test",
+                Message = "Pipeline ",
                 Date = DateTime.Now
             });
         }
