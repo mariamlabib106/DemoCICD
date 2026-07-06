@@ -11,7 +11,7 @@ namespace DemoCICD.Controllers
         {
             return Ok(new
             {
-                Message = "Hello from CI/CD Demo Project!",
+                Message = "Pipeline Trigger Test",
                 Date = DateTime.Now
             });
         }
