@@ -1,4 +1,4 @@
-﻿name: .NET Build Pipeline
+﻿ name: Demo CI
 
 on:
   push:
@@ -7,20 +7,12 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    steps:
-
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-
-    - name: Install .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-
-    - name: Restore Packages
-      run: dotnet restore
+    uses: mariamlabib106/pipeline-templates/.github/workflows/dotnet-build.yml@main
+    with:
+      dotnet-version: "8.0.x"
+      build-configuration: "Release"
+      project-name: "DemoCICD"
+      environment: "Production"
 
     - name: Build Project
       run: dotnet build --configuration Release --no-restore
