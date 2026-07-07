@@ -1,4 +1,4 @@
-﻿ name: Demo CI
+ name: Demo CI
 
 on:
   push:
@@ -13,6 +13,3 @@ jobs:
       build-configuration: "Release"
       project-name: "DemoCICD"
       environment: "Production"
-
-    - name: Build Project
-      run: dotnet build --configuration Release --no-restore
