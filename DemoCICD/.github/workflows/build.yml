@@ -1,26 +1,28 @@
-﻿name: .NET Build Pipeline
+﻿ name: .NET Build Pipeline
 
 on:
   push:
     branches:
-      - production
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Install .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    - name: Install .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+      - name: Restore Packages
+        run: dotnet restore DemoCICD.sln
 
-    - name: Restore Packages
-      run: dotnet restore
+      - name: Build Project
+        run: dotnet build DemoCICD.sln --configuration Release --no-restore
 
-    - name: Build Project
-      run: dotnet build --configuration Release --no-restore
+      - name: Build Docker Image
+        run: docker build -t democicd:latest ./DemoCICD
