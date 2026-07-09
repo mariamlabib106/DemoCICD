@@ -106,4 +106,4 @@ jobs:
 
       - name: Show Published Version
         run: |
-          echo "Published Docker Image: mariamlabib10/democicd:${{ env.VERSION }}"
+          echo "Published Docker Image: mariamlabib10/democicd:${{ env.VERSION }}" 
