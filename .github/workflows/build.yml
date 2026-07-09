@@ -5,6 +5,18 @@ on:
     branches:
       - production
 
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "Select version to increment"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,7 +51,6 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Generate Docker Version
-        id: version
         run: |
           IMAGE="mariamlabib10/democicd"
 
@@ -47,18 +58,41 @@ jobs:
             | jq -r '.results[].name' \
             | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
             | sort -V \
-            | tail -n 1)
+            | tail -n1)
 
           if [ -z "$LAST_TAG" ]; then
-            VERSION="0.0.0"
+            MAJOR=0
+            MINOR=0
+            PATCH=0
           else
             IFS='.' read -r MAJOR MINOR PATCH <<< "$LAST_TAG"
-            PATCH=$((PATCH + 1))
-            VERSION="$MAJOR.$MINOR.$PATCH"
           fi
 
+          VERSION_TYPE="${{ github.event.inputs.version_type }}"
+
+          if [ -z "$VERSION_TYPE" ]; then
+            VERSION_TYPE="patch"
+          fi
+
+          case "$VERSION_TYPE" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          VERSION="$MAJOR.$MINOR.$PATCH"
+
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Generated version: $VERSION"
+          echo "Generated Version: $VERSION"
 
       - name: Build Docker Image
         run: |
