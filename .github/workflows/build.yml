@@ -18,13 +18,13 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore
+      - name: Restore Dependencies
         run: dotnet restore DemoCICD.sln
 
-      - name: Build
+      - name: Build Project
         run: dotnet build DemoCICD.sln --configuration Release --no-restore
 
-      - name: Publish
+      - name: Publish Project
         run: dotnet publish DemoCICD/DemoCICD.csproj --configuration Release --output ./publish
 
       - name: Install jq
@@ -36,9 +36,10 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Generate Docker Version
+        id: version
         run: |
           IMAGE="mariamlabib10/democicd"
 
@@ -46,7 +47,7 @@ jobs:
             | jq -r '.results[].name' \
             | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
             | sort -V \
-            | tail -n1)
+            | tail -n 1)
 
           if [ -z "$LAST_TAG" ]; then
             VERSION="0.0.0"
@@ -57,14 +58,18 @@ jobs:
           fi
 
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Generated version: $VERSION"
 
       - name: Build Docker Image
         run: |
-          docker build -t mariamlabib10/democicd:${{ env.VERSION }} ./DemoCICD
+          docker build \
+            -t mariamlabib10/democicd:${{ env.VERSION }} \
+            ./DemoCICD
 
       - name: Push Docker Image
         run: |
           docker push mariamlabib10/democicd:${{ env.VERSION }}
 
-      - name: Done
-        run: echo "Published version ${{ env.VERSION }}"
+      - name: Show Published Version
+        run: |
+          echo "Published Docker Image: mariamlabib10/democicd:${{ env.VERSION }}"
